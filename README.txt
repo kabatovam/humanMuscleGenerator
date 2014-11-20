@@ -8,7 +8,7 @@ To do list for winter semester:
 	Write first chunk of program to test the shaders - done
 	Create model - done (human and plane)
 	Find out why tesselation shader is not working - done
-	Create the tesselation shader to work on textures - in progress
+	Create the tesselation shader to work on textures - in progress - dealing with texture coordinates
 	Test the tesselation shader on the plane
 	Rewrite the c++ code to create simple window with some interaction
 	Find out why you can't import the color tiff file
