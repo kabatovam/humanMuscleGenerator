@@ -8,11 +8,15 @@
 //#include <QtGui>
 #include <iostream>
 #include <fstream>
+
+#include <QOpenGLTexture>
+#include "scenecontroller.h"
+
 class GLWidget : public QGLWidget
 {
   Q_OBJECT
 public:
-     GLWidget(QWidget *parent = 0);
+     GLWidget(QGLFormat &format, QWidget *parent = 0);
      ~GLWidget();
 
         QSize minimumSizeHint() const;
@@ -49,6 +53,8 @@ public:
         QVector<QVector3D> vertices;
 
         std::string readFile(const char *filePath);
+
+        SceneController sc;
     };
 
 #endif // GLWIDGET_H

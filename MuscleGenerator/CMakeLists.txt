@@ -1,6 +1,5 @@
 project(MuscleGenerator)
 cmake_minimum_required(VERSION 2.8.11)
-#set(CMAKE_PREFIX_PATH "/Users/andrea/Developer/Qt5/5.2.1/clang_64")
 
 # Install destinations
 set( CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/_install CACHE PATH "Installation Destination" FORCE)
@@ -14,10 +13,10 @@ SET( INSTALL_DES ./ CACHE PATH "Where to install to." )
 
 
 # Qt library
-find_package(Qt5Core)
-#find_package(Qt5Gui)
-find_package(Qt5Widgets)
-find_package(Qt5OpenGL)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
 set(CMAKE_AUTOMOC ON)
 include_directories(${Qt5Widgets_INCLUDES})
 add_definitions(${Qt5Widgets_DEFINITIONS})
@@ -52,7 +51,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 aux_source_directory(. SRC_LIST)
 add_executable(${PROJECT_NAME} ${SRC_LIST})
 qt5_use_modules(MuscleGenerator Widgets OpenGL)
-target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} ${QT5Widgets_LIBRARIES} ${QT_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} ${QT5Widgets_LIBRARIES}  ${QT_LIBRARIES})
 
 
 
