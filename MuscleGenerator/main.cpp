@@ -12,7 +12,6 @@ int main(int argv, char **args)
     w.show();
 
 
-    cout << "Hello World!" << endl;
     return app.exec();
 
 }

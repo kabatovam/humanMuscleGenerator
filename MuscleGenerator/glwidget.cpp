@@ -1,17 +1,11 @@
 #include "glwidget.h"
-
+#include "scenecontroller.h"
 #include <math.h>
 
-GLWidget::GLWidget(QWidget *parent)
+GLWidget::GLWidget(QGLFormat &format, QWidget *parent)
      : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
  {
-     //logo = 0;
-     xRot = 0;
-     yRot = 0;
-     zRot = 0;
 
-     qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
-     qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
  }
 
  GLWidget::~GLWidget()
@@ -84,7 +78,9 @@ GLWidget::GLWidget(QWidget *parent)
      glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 
    //  glShader = glCreateShader(GL_VERTEX_SHADER);
-
+     sc.init();
+      // Load cube.png image
+      sc.createTexture();
 
 
  }
@@ -97,12 +93,14 @@ GLWidget::GLWidget(QWidget *parent)
      glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
      glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
      glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
+     sc.paintObject();
+
 
  }
 
  void GLWidget::resizeGL(int width, int height)
  {
-     int side = qMin(width, height);
+    /* int side = qMin(width, height);
      glViewport((width - side) / 2, (height - side) / 2, side, side);
 
      glMatrixMode(GL_PROJECTION);
@@ -112,7 +110,8 @@ GLWidget::GLWidget(QWidget *parent)
  #else
      glOrtho(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
  #endif
-     glMatrixMode(GL_MODELVIEW);
+     glMatrixMode(GL_MODELVIEW);*/
+     sc.changeProjection(width, height);
  }
 
  void GLWidget::mousePressEvent(QMouseEvent *event)

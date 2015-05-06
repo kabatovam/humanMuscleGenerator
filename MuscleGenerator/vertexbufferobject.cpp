@@ -1,11 +1,12 @@
 #include "vertexbufferobject.h"
 
-
+#include <iostream>
 
 
 
 VertexBufferObject::VertexBufferObject()
 {
+
 
 }
 
@@ -13,8 +14,16 @@ VertexBufferObject::~VertexBufferObject()
 {
 
 }
+void VertexBufferObject::initGLFunc(){
+    initializeGLFunctions();
+}
 
 void VertexBufferObject::initializeBuffer(){
+
+    createBuffers();
+    createData();
+    createGeometry();
+    bindBuffers();
 
 }
 
@@ -74,14 +83,17 @@ void VertexBufferObject::createGeometry(){
 }
 
 void VertexBufferObject::bindBuffers(){
-    initializeOpenGLFunctions();
-    // Transfer vertex data to VBO 0
-       glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
-       glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(data), vertices, GL_STATIC_DRAW);
 
-       // Transfer index data to VBO 1
-       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);
-       glBufferData(GL_ELEMENT_ARRAY_BUFFER, 34 * sizeof(GLushort), indices, GL_STATIC_DRAW);
+    // Transfer vertex data to VBO 0
+    vertexBuff.create();
+    indexBuff.create();
+
+    vertexBuff.bind();
+    vertexBuff.allocate(vertices, 24 * sizeof(data));
+
+    // Transfer index data to VBO 1
+    indexBuff.bind();
+    indexBuff.allocate(indices, 34 * sizeof(GLushort));
 }
 
 void VertexBufferObject::createBuffers(){
@@ -90,4 +102,29 @@ void VertexBufferObject::createBuffers(){
         createData();
         createGeometry();
         bindBuffers();
+}
+
+void VertexBufferObject::draw(QOpenGLShaderProgram *program){
+    // Tell OpenGL which VBOs to use
+        vertexBuff.bind();
+        indexBuff.bind();
+
+        // Offset for position
+        quintptr offset = 0;
+
+        // Tell OpenGL programmable pipeline how to locate vertex position data
+        int vertexLocation = program->attributeLocation("a_position");
+        program->enableAttributeArray(vertexLocation);
+        program->setAttributeBuffer(vertexLocation, GL_FLOAT, offset, 3, sizeof(data));
+
+        // Offset for texture coordinate
+        offset += sizeof(QVector3D);
+
+        // Tell OpenGL programmable pipeline how to locate vertex texture coordinate data
+        int texcoordLocation = program->attributeLocation("a_texcoord");
+        program->enableAttributeArray(texcoordLocation);
+        program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(data));
+
+        // Draw cube geometry using indices from VBO 1
+        glDrawElements(GL_TRIANGLE_STRIP, 34, GL_UNSIGNED_SHORT, 0);
 }
