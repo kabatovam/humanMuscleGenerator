@@ -1,9 +1,11 @@
 #include "XMLFileManipulator.h"
 
+using namespace tinyxml2;
 
 XMLFileManipulator::XMLFileManipulator()
 {
-	//doc.LoadFile("");
+	XMLDocument doc;
+	doc.LoadFile("");
 }
 
 

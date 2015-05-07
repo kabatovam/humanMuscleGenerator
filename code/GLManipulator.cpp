@@ -1,5 +1,8 @@
 #include "GLManipulator.h"
-
+#include <IL/il.h>
+#include <IL/ilut.h>
+#include <FreeImage.h>
+#include <libtiff/tiffio.h>
 
 GLManipulator::GLManipulator()
 {
@@ -89,7 +92,7 @@ void GLManipulator::paint(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glUseProgram(shaderProgram);
 	
-	m->tick(globalInverseTransform, scene->mAnimations[0]);
+	//m->tick(globalInverseTransform, scene->mAnimations[0]);
 
 	cm->bindCamera(&shaderProgram);
 	m->bindBones(&shaderProgram);
@@ -99,7 +102,8 @@ void GLManipulator::paint(){
 	glUniform1i(glGetUniformLocation(shaderProgram, "tex"), 0);
 
 	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT, 0);
+	glPatchParameteri(GL_PATCH_VERTICES, 3);
+	glDrawElements(GL_PATCHES, indices_size, GL_UNSIGNED_INT, 0);
 
 
 	glBindVertexArray(0);
@@ -167,17 +171,74 @@ void GLManipulator::moveCamera(std::string direction){
 }
 
 void GLManipulator::setupTexture(){
+	
 	glGenTextures(1, &texture);
+	
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+	
 	int width, height;
 	unsigned char* image = SOIL_load_image("C:/martinka/libs/arm_texture.png", &width, &height, 0, SOIL_LOAD_RGB);
+	
+	/*
+	GLuint width, height;
+
+	TIFF* tif = TIFFOpen("C:/martinka/libs/arm_muscles_vdm.tif", "r");
+	TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
+	TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
+	unsigned char* data;
+	data = (unsigned char*)_TIFFmalloc((tsize_t)(TIFFNumberOfStrips(tif) * TIFFStripSize(tif)));
+
+	for (tstrip_t strip = 0; strip < TIFFNumberOfStrips(tif); strip++)
+		TIFFReadEncodedStrip(tif, strip, data + strip * TIFFStripSize(tif), (tsize_t)-1);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	
+	TIFFClose(tif);*/
+
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	SOIL_free_image_data(image);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	/*
+	huboError2 = glGetError();
+	if (huboError2){
+
+		std::cout << "Eror before " << huboError2 << std::endl;
+	}
+	
+	FREE_IMAGE_FORMAT    fif;
+
+	//DeleteContents();
+	GLenum huboError2 = glGetError();
+	if (huboError2){
+
+		std::cout << "Eror before " << huboError2 << std::endl;
+	}
+
+	fif = FreeImage_GetFIFFromFilename("C:/martinka/libs/arm_muscles_vdm.tif");
+	if (fif != FIF_UNKNOWN)
+	{
+		FIBITMAP *image = FreeImage_Load(fif, "C:/martinka/libs/arm_muscles_vdm.tif");
+		image = FreeImage_ConvertTo32Bits(image);
+		int width = FreeImage_GetWidth(image);
+		int height = FreeImage_GetHeight(image);
+		std::cout << "The size of the image is: "  << " es " << width << "*" << height << std::endl; //Some debugging code
+
+		char* pixeles = (char*)FreeImage_GetBits(image);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, image);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		GLenum huboError = glGetError();
+		if (huboError){
+
+			std::cout << "There was an error loading the texture " << huboError << std::endl;
+		}
+	}
+	glBindTexture(GL_TEXTURE_2D, 0);*/
 }
