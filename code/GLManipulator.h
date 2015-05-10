@@ -20,6 +20,7 @@ public:
 	void paint();
 	void rotateCamera(GLfloat angle, bool xaxis, bool yaxis);
 	void moveCamera(std::string direction);
+	void stopAnimation();
 protected:
 	void loadMesh(const std::string path);
 	void processNode(aiNode *node);
@@ -61,7 +62,9 @@ private:
 	GLuint texCoordPosition;
 	CameraManipulator *cm;
 	GLuint texture;
+	GLuint dispMap;
 	aiMatrix4x4 globalInverseTransform;
+	bool animationStopped;
 	//Assimp::Importer importer;
 
 	

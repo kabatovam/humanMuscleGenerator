@@ -31,12 +31,16 @@ public:
 	GLuint getBoneID(){ return boneID; }
 	void animateBone(AnimationManipulator *anim, double time, aiMatrix4x4 globalInverseTransform);
 	void createAnimationInfo(aiNodeAnim *node);
+	void setUpInfluencedBone(std::string infName, int percentage);
+	void setUpInfluencer(std::string infName, int minAngle, int maxAngle);
 protected:
 	void setChildren(); 
 	void writeMatrix(aiMatrix4x4 mat);
 	aiQuaternion calcRotation(double AnimationTime, aiNodeAnim *anim);
 	aiVector3D calcScaling(double AnimationTime, aiNodeAnim *anim);
 	aiVector3D calcTranslation(double AnimationTime, aiNodeAnim *anim);
+	void setParentChildAngle(double angle){ parentChildAngle = angle; }
+	double getParentChildAngle(){ return parentChildAngle; }
 private:
 	std::string child;
 	aiMatrix4x4 offsetMatrix;
@@ -46,6 +50,12 @@ private:
 	aiMatrix4x4 boneTransform;
 	GLuint boneID;
 	BoneAnimation *animation;
+	double parentChildAngle; //currentAngle
+	int minAngle, maxAngle;
+	float interpolation;
+	std::string influencerName;
+	int influencerPercentage;
+	bool iAmInfluencer;
 	
 };
 

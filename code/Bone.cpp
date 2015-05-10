@@ -21,6 +21,12 @@ Bone::Bone(aiBone *bone){
 	std::cout << "Creating bone named: " << bone->mName.data << std::endl;
 	next = NULL;
 	animation = NULL;
+	minAngle = 0;
+	maxAngle = 0;
+	interpolation = 0;
+	influencerName = "";
+	influencerPercentage = 0;
+	iAmInfluencer = false;
 	
 }
 
@@ -70,13 +76,22 @@ void Bone::rotateBone(float angle, aiVector3t<float> axis, aiMatrix4x4 globalInv
 }
 
 glm::mat4x4 Bone::getFinalTransform(){
-	std::cout << "I am returning final matrix. Here it is!\n";
-	writeMatrix(finalTransform);
-	
+	//std::cout << "I am returning final matrix. Here it is!\n";
+	//writeMatrix(finalTransform);
+	std::cout << "I am bone " << boneName << std::endl;
+	std::cout << "I have X oriantation: " << globalTransform.a1 << " , " << globalTransform.b1 << " , " << globalTransform.c1 << std::endl;
+	std::cout << "I have Y oriantation: " << globalTransform.a2 << " , " << globalTransform.b2 << " , " << globalTransform.c2 << std::endl;
+	std::cout << "I have Z oriantation: " << globalTransform.a3 << " , " << globalTransform.b3 << " , " << globalTransform.c3 << std::endl;
+	if (parent != NULL){
+		parentChildAngle = animation->calculateAngle(parent->globalTransform, globalTransform,"X"); //zapisovanie axis!
+		if (iAmInfluencer)
+			animation->calcInterpolation(parentChildAngle, minAngle, maxAngle); //posielat do parent settera
+	}
 	return glm::mat4x4(finalTransform.a1, finalTransform.a2, finalTransform.a3, finalTransform.a4,
 		finalTransform.b1, finalTransform.b2, finalTransform.b3, finalTransform.b4,
 		finalTransform.c1, finalTransform.c2, finalTransform.c3, finalTransform.c4,
 		finalTransform.d1, finalTransform.d2, finalTransform.d3, finalTransform.d4);
+	
 	
 }
 
@@ -86,25 +101,29 @@ void Bone::setBindPose(aiMatrix4x4 globalInverseTransform){
 	std::cout << "I am creating bind pose. My name is " << boneName << std::endl;
 	
 	if (parent != NULL){
-		std::cout << "My parent's global transform is: ";
-		writeMatrix(parent->getGlobalTransform());
+		//std::cout << "My parent's global transform is: ";
+		//writeMatrix(parent->getGlobalTransform());
 		globalTransform = parent->getGlobalTransform() * nodeTransform;
-		std::cout << "My global transform is: ";
-		writeMatrix(globalTransform);
+		//std::cout << "My global transform is: ";
+		//writeMatrix(globalTransform);
 	}
 		
 	else{
-		std::cout << "I don't have parents! I am the root bone!" << std::endl;
+		//std::cout << "I don't have parents! I am the root bone!" << std::endl;
 		globalTransform =  nodeTransform;
-		std::cout << "My global transform matrix is: ";
-		writeMatrix(globalTransform);
+		//std::cout << "My global transform matrix is: ";
+		//writeMatrix(globalTransform);
 	}
 
 	
 	finalTransform = globalInverseTransform * globalTransform * offsetMatrix;
 	//finalTransform = finalTransform;
-	std::cout << "My final transform matrix is: ";
-	writeMatrix(finalTransform);
+	//std::cout << "My final transform matrix is: ";
+	//writeMatrix(finalTransform);
+	aiVector3D parentX = finalTransform * aiVector3D(0.0, 1.0, 0.0);
+	//std::cout << "I have X oriantation: " << finalTransform.a1 << " , " << finalTransform.b1 << " , " << finalTransform.c1 << std::endl;
+	//std::cout << "I have Y oriantation: " << finalTransform.a2 << " , " << finalTransform.b2 << " , " << finalTransform.c2 << std::endl;
+	//std::cout << "I have Z oriantation: " << finalTransform.a3 << " , " << finalTransform.b3 << " , " << finalTransform.c3 << std::endl;
 }
 
 /*
@@ -169,7 +188,10 @@ void Bone::animateBone(AnimationManipulator *anim, double time, aiMatrix4x4 glob
 		globalTransform =  nodeTransform;
 
 	finalTransform = globalInverseTransform * globalTransform * offsetMatrix;
-	
+	std::cout << "I have X oriantation: " << finalTransform.a1 << " , " << finalTransform.b1 << " , " << finalTransform.c1 << std::endl;
+	std::cout << "I have Y oriantation: " << finalTransform.a2 << " , " << finalTransform.b2 << " , " << finalTransform.c2 << std::endl;
+	std::cout << "I have Z oriantation: " << finalTransform.a3 << " , " << finalTransform.b3 << " , " << finalTransform.c3 << std::endl;
+
 }
 
 aiQuaternion Bone::calcRotation(double animationTime, aiNodeAnim *anim){
@@ -251,10 +273,36 @@ void Bone::createAnimationInfo(aiNodeAnim *node){
 }
 
 void Bone::setBoneTransform(aiMatrix4x4 transform){
-	std::cout << "Setujem boneTransform. Here is the input: \n";
-	writeMatrix(transform);
+	//std::cout << "Setujem boneTransform. Here is the input: \n";
+	//writeMatrix(transform);
 	boneTransform = transform; 
 
-	std::cout << "and the boneTransform matrix: \n";
-	writeMatrix(boneTransform);
+	//std::cout << "and the boneTransform matrix: \n";
+	//writeMatrix(boneTransform);
+}
+
+void Bone::setUpInfluencedBone(std::string infName, int percentage){
+	if (infName.compare(boneName) == 0){
+		std::cout << "I am influencing myself!\n";
+		interpolation = (float)percentage / 100;
+	}
+	else{
+		std::cout << "My name is " << boneName << "and I am influenced by " << infName << std::endl;
+		influencerName = infName;
+		influencerPercentage = percentage;
+	}
+
+}
+void Bone::setUpInfluencer(std::string infName, int minAng, int maxAng){
+	if (infName.compare(boneName) == 0){
+		return;
+	}
+	else{
+		//influencujem parenta
+		std::cout << "I am influencer. My name is: " << boneName << "and angles are: " << maxAng << " and " << minAng << std::endl;
+		maxAngle = maxAng;
+		minAngle = minAng;
+		iAmInfluencer = true;
+	}
+	
 }

@@ -24,6 +24,11 @@ public:
 	GLuint getNumScaling();
 	GLuint getNumRotation();
 	GLuint getNumTranslation();
+
+	double calculateAngle(aiMatrix4x4 parentFinal, aiMatrix4x4 childFinal, std::string axis);
+	double calcAngle(aiVector3D parent, aiVector3D child);
+	double calcInterpolation(double currentAngle, int minAngle, int maxAngle);
+		
 private:
 	GLuint numScaling;
 	GLuint numTranslation;
@@ -36,6 +41,5 @@ private:
 	std::vector<aiVector3D> translation;
 	std::vector<aiVector3D> scaling;
 	std::vector<aiQuaternion> rotation;
-
 };
 

@@ -7,6 +7,9 @@
 GLManipulator::GLManipulator()
 {
 	cm = new CameraManipulator();
+	texture = 0;
+	dispMap = 1;
+	animationStopped = true;
 }
 
 
@@ -76,10 +79,11 @@ void GLManipulator::initialize(){
 	glEnable(GL_LIGHT0);
 	glEnable(GL_TEXTURE_2D);
 	setupShaders();
-	loadMesh("C:/martinka/arm_anim.dae");
+	loadMesh("C:/martinka/cone_bone_anim.dae");
 	m->setupBindPose(globalInverseTransform);
 	setupTexture();
 	m->writeBones();
+	m->bindInfluencers();
 	//m->RotateBone("Bone002", 20, 1, 0, 0, 0, globalInverseTransform);
 	//std::cout << "T3sting number: " <<scene->mNumMeshes << std::endl;
 	//m->tick(globalInverseTransform, scene->mAnimations[0]);
@@ -92,7 +96,8 @@ void GLManipulator::paint(){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glUseProgram(shaderProgram);
 	
-	//m->tick(globalInverseTransform, scene->mAnimations[0]);
+	if (!animationStopped)
+		m->tick(globalInverseTransform, scene->mAnimations[0]);
 
 	cm->bindCamera(&shaderProgram);
 	m->bindBones(&shaderProgram);
@@ -100,6 +105,12 @@ void GLManipulator::paint(){
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glUniform1i(glGetUniformLocation(shaderProgram, "tex"), 0);
+	
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, dispMap);
+	glUniform1i(glGetUniformLocation(shaderProgram, "dispMap"), 1);
+	
 
 	glBindVertexArray(VAO);
 	glPatchParameteri(GL_PATCH_VERTICES, 3);
@@ -175,18 +186,28 @@ void GLManipulator::setupTexture(){
 	glGenTextures(1, &texture);
 	
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	
 	int width, height;
-	unsigned char* image = SOIL_load_image("C:/martinka/libs/arm_texture.png", &width, &height, 0, SOIL_LOAD_RGB);
+	unsigned char* image = SOIL_load_image("C:/martinka/libs/textura.png", &width, &height, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SOIL_free_image_data(image);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	
+	glGenTextures(1, &dispMap);
+
+	glBindTexture(GL_TEXTURE_2D, dispMap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	
 	/*
-	GLuint width, height;
-
-	TIFF* tif = TIFFOpen("C:/martinka/libs/arm_muscles_vdm.tif", "r");
+	TIFF* tif = TIFFOpen("C:/martinka/libs/cone_vdm.tif", "r");
 	TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
 	TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
 	unsigned char* data;
@@ -194,51 +215,55 @@ void GLManipulator::setupTexture(){
 
 	for (tstrip_t strip = 0; strip < TIFFNumberOfStrips(tif); strip++)
 		TIFFReadEncodedStrip(tif, strip, data + strip * TIFFStripSize(tif), (tsize_t)-1);
+	GLuint ndata = width*height;
+/*	for (GLuint i = 0; i < ndata; i++) {
+		register unsigned char *cp = (unsigned char *)&data[i];
+		int t;
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
+		t = cp[3];
+		cp[3] = cp[0];
+		cp[0] = t;
+		t = cp[2];
+		cp[2] = cp[1];
+		cp[1] = t;
+	}*/
 	
-	TIFFClose(tif);*/
+	TIFF* tif = TIFFOpen("C:/martinka/libs/16bit_texture_vdm.tif", "r");
+	if (tif) {
+		uint32 w, h;
+		size_t npixels;
+		uint32* raster;
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	SOIL_free_image_data(image);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	/*
-	huboError2 = glGetError();
-	if (huboError2){
-
-		std::cout << "Eror before " << huboError2 << std::endl;
-	}
-	
-	FREE_IMAGE_FORMAT    fif;
-
-	//DeleteContents();
-	GLenum huboError2 = glGetError();
-	if (huboError2){
-
-		std::cout << "Eror before " << huboError2 << std::endl;
-	}
-
-	fif = FreeImage_GetFIFFromFilename("C:/martinka/libs/arm_muscles_vdm.tif");
-	if (fif != FIF_UNKNOWN)
-	{
-		FIBITMAP *image = FreeImage_Load(fif, "C:/martinka/libs/arm_muscles_vdm.tif");
-		image = FreeImage_ConvertTo32Bits(image);
-		int width = FreeImage_GetWidth(image);
-		int height = FreeImage_GetHeight(image);
-		std::cout << "The size of the image is: "  << " es " << width << "*" << height << std::endl; //Some debugging code
-
-		char* pixeles = (char*)FreeImage_GetBits(image);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, image);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		GLenum huboError = glGetError();
-		if (huboError){
-
-			std::cout << "There was an error loading the texture " << huboError << std::endl;
+		TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
+		TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
+		npixels = w * h;
+		raster = (uint32*)_TIFFmalloc(npixels * sizeof (uint32));
+		if (raster != NULL) {
+			if (TIFFReadRGBAImage(tif, w, h, raster, 0)) {
+				
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, raster);
+			}
+			_TIFFfree(raster);
 		}
+		TIFFClose(tif);
+	
 	}
-	glBindTexture(GL_TEXTURE_2D, 0);*/
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); //tiff to cita dajako naopak skontrolovat!
+	//glGenerateMipmap(GL_TEXTURE_2D);
+
+	
+//	TIFFClose(tif);
+
+	
+	
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void GLManipulator::stopAnimation(){
+	if (animationStopped == true){
+		animationStopped = false;
+	}
+	else
+		animationStopped = true;
+			
 }

@@ -63,12 +63,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32s.lib;assimp.lib;SOIL.lib;tinyxml.lib;libtiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32s.lib;assimp.lib;SOIL.lib;libtiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -76,10 +77,12 @@
     <ClCompile Include="Bone.cpp" />
     <ClCompile Include="BoneAnimation.cpp" />
     <ClCompile Include="CameraManipulator.cpp" />
+    <ClCompile Include="Element.cpp" />
     <ClCompile Include="GLManipulator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeshManipulator.cpp" />
     <ClCompile Include="ShaderManipulator.cpp" />
+    <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="XMLFileManipulator.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -87,9 +90,11 @@
     <ClInclude Include="Bone.h" />
     <ClInclude Include="BoneAnimation.h" />
     <ClInclude Include="CameraManipulator.h" />
+    <ClInclude Include="Element.h" />
     <ClInclude Include="GLManipulator.h" />
     <ClInclude Include="MeshManipulator.h" />
     <ClInclude Include="ShaderManipulator.h" />
+    <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="XMLFileManipulator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

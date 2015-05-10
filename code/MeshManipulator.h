@@ -8,9 +8,14 @@
 #include <GLFW/glfw3.h>
 #include <assimp/mesh.h>
 #include <vector>
-
+#include "tinyxml2.h"
+#include "tinyxml.h"
 #include "Bone.h"
 #include "AnimationManipulator.h"
+#include "XMLFileManipulator.h"
+#include "Element.h"
+
+
 
 class MeshManipulator
 {
@@ -36,6 +41,9 @@ public:
 	void setupBindPose(aiMatrix4x4 globalInverseTransform);
 	void startAnimation(aiAnimation *_anim);
 	void tick(aiMatrix4x4 git,aiAnimation *_anim);
+	void bindInfluencers();
+	void readXMLFile();
+	void updateBones(const char* boneName, const char* influencerName, const char* axis, const char* minAngle, const char* maxAngle, const char* percentage);
 
 private:
 	std::vector<glm::vec3> vertices;
@@ -52,5 +60,7 @@ private:
 	GLuint ticksPerSecond;
 	AnimationManipulator *anim;
 	std::vector<std::string> boneMap;
+	XMLFileManipulator *xfm;
+	std::vector<Element> infVec;
 };
 

@@ -1,6 +1,8 @@
 #include "MeshManipulator.h"
 #include <iostream>
 #include <string>
+
+using namespace tinyxml2;
 MeshManipulator::MeshManipulator(){
 
 }
@@ -82,6 +84,10 @@ MeshManipulator::MeshManipulator(aiMesh *mesh)
 	}
 
 	
+	/*for (GLuint i = 0; i < infVec.size(); i++){
+		std::cout << "Vector element: " << infVec[i].boneName << std::endl;
+	}*/
+	//spravit vector a tutok a poslat cez odkaz nech sa tamto zapise iba a tutok to budem mat ulozene.
 }
 
 
@@ -311,6 +317,86 @@ void MeshManipulator::tick(aiMatrix4x4 git, aiAnimation *_anim){
 		offsetMatrices[i][2][0] = mat[2][0]; offsetMatrices[i][2][1] = mat[2][1]; offsetMatrices[i][2][2] = mat[2][2]; offsetMatrices[i][2][3] = mat[2][3];
 		offsetMatrices[i][3][0] = mat[3][0]; offsetMatrices[i][3][1] = mat[3][1]; offsetMatrices[i][3][2] = mat[3][2]; offsetMatrices[i][3][3] = mat[3][3];
 
+		temp = temp->next;
+	}
+}
+
+void MeshManipulator::bindInfluencers(){
+	readXMLFile();
+	/*Bone *temp = rootBone;
+	std::cout << "BINDING INFLUENCERS!";
+	
+	while (temp != NULL){
+		
+		if (inf != NULL){
+			std::cout << "Nasiel som inf pre kost: " << inf->boneName << std::endl;
+		}
+		temp = temp->next;
+	}*/
+}
+
+void MeshManipulator::readXMLFile(){
+	XMLDocument doc;
+	XMLError result = doc.LoadFile("C:/martinka/libs/skeleton_data.xml");
+	if (result != XML_SUCCESS) { printf("Error: %i\n", result); }
+	XMLNode *root = doc.FirstChild();
+	if (root == NULL){ std::cout << "ERROR reading file.\n"; }
+	std::cout << "File reading succescfull\n";
+	XMLElement *child;
+	for (child = root->FirstChildElement("bone"); child != 0; child = child->NextSiblingElement("bone")){
+		const char* text = child->Attribute("name");
+		std::cout << text << std::endl;
+		XMLElement *inf;
+
+		for (inf = child->FirstChildElement("influencer"); inf != 0; inf = inf->NextSiblingElement("influencer")){
+			
+			const char* boneName = child->Attribute("name");
+			const char* influencerName = inf->Attribute("name");
+			std::cout << "influencer:  " << inf->Attribute("name") << std::endl;
+			std::cout << "influencer:  " << influencerName << std::endl;
+			XMLElement *children;
+			const char* minAngle = "";
+			const char* maxAngle = "";
+			const char* axis = "";
+			const char* percentage = "";
+			for (children = inf->FirstChildElement(); children != 0; children = children->NextSiblingElement()){
+				std::cout << "reading more info: \n";
+				if (strcmp(children->Name(), "minAngle") == 0){
+					std::cout << "minAngle: " << children->GetText() << std::endl;
+					minAngle = children->GetText();
+				}
+				if (strcmp(children->Name(), "maxAngle") == 0){
+					std::cout << "maxAngle: " << children->GetText() << std::endl;
+					maxAngle = children->GetText();
+				}
+				if (strcmp(children->Name(), "axis") == 0){
+					std::cout << "axis: " << children->GetText() << std::endl;
+					axis = children->GetText();
+				}
+				if (strcmp(children->Name(), "percentage") == 0){
+					std::cout << "percentage: " << children->GetText() << std::endl;
+					percentage = children->GetText();
+				}
+			}
+			updateBones(boneName, influencerName, axis, minAngle, maxAngle, percentage);
+		}
+	}
+}
+
+
+void MeshManipulator::updateBones(const char* boneName, const char* influencerName, const char* axis, const char* minAngle, const char* maxAngle, const char* percentage) {
+	Bone *temp = rootBone;
+	
+	while (temp != NULL){
+		std::cout << "Looking for bone " << temp->getName().c_str() << std::endl;
+		if (strcmp(temp->getName().c_str(), boneName) == 0){
+			temp->setUpInfluencedBone(std::string(influencerName), atoi(percentage));
+			std::cout << "I found bone!";
+		}
+		if (strcmp(temp->getName().c_str(), influencerName) == 0){
+			std::cout << "I found influencer." << atoi(minAngle);
+			temp->setUpInfluencer(std::string(boneName), atoi(minAngle), atoi(maxAngle));
+		}
 		temp = temp->next;
 	}
 }
