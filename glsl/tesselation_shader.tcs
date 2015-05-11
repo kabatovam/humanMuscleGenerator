@@ -5,13 +5,16 @@ layout(vertices = 3) out;
 
 in vec3 vPosition[];
 in vec2 vTexCoord[];
+in float vInterpolation[];
 out vec3 tcPosition[];
 out vec2 TexCoord_ES[];
+patch out float interpolation_ES;
 
 void main()
 {
 	tcPosition[gl_InvocationID] = vPosition[gl_InvocationID];
 	TexCoord_ES[gl_InvocationID] = vTexCoord[gl_InvocationID];
+	interpolation_ES = vInterpolation[gl_InvocationID];
 	if(gl_InvocationID == 0 )
 	{
 	

@@ -6,6 +6,7 @@ layout(triangles, equal_spacing,ccw) in;
 
 in vec3 tcPosition[];
 in vec2 TexCoord_ES[];
+patch in float interpolation_ES;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -25,10 +26,18 @@ void main()
 	
 	texCoord = vec2((vec2(gl_TessCoord.x) * TexCoord_ES[0]) + (vec2(gl_TessCoord.y) * TexCoord_ES[1]) + (vec2(gl_TessCoord.z) * TexCoord_ES[2]));
 	vec4 map = texture(tex,texCoord.xy) ;
-	
-	vec3 p0 = (gl_TessCoord.x * tcPosition[0]);// + (map.r*10);
-	vec3 p1 = (gl_TessCoord.y * tcPosition[1]);// + (map.g*10);
-	vec3 p2 = (gl_TessCoord.z * tcPosition[2]) ;//+ (map.b*10);
+	//map.r = (map.r*2)-1;
+	//map.g = (map.g*2)-1;
+	//map.b = (map.b*2)-1;
+	//map.a = (map.a*2)-1;
+	float mapr = (map.r/255) ;
+	float mapg = (map.g/255) ;
+	float mapb = (map.b/255) ;
+	map.a = 1;
+	vec3 p0 = (gl_TessCoord.x * tcPosition[0]) + (map.r*10 * interpolation_ES);
+	vec3 p1 = (gl_TessCoord.y * tcPosition[1]) + (map.g*10 * interpolation_ES);
+	vec3 p2 = (gl_TessCoord.z * tcPosition[2]) + (map.b*10 * interpolation_ES);
+	map.g = interpolation_ES;
 	color_ES = map;
 	
 	vec3 tePosition = p0+p1+p2;

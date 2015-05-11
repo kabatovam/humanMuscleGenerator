@@ -74,7 +74,7 @@ MeshManipulator::MeshManipulator(aiMesh *mesh)
 			//setupBindPose();
 			//offsetMatrices.push_back(mat);
 			offsetMatrices.resize(4);
-			
+			interpolation.resize(4);
 		}
 		
 	}
@@ -177,20 +177,14 @@ void MeshManipulator::bindBones(GLuint *shaderProgram){
 		boneLoc[i] = glGetUniformLocation(*shaderProgram, name.c_str());
 	}
 
-
-
 	for (GLuint i = 0; i < MAX_BONES; i++){
 		glm::mat4 mat = offsetMatrices[i];
-		/*
-			std::cout << "I am binding final matrix number: " << i << " . Here it is!:\n";
-			std::cout << mat[0][0] << "," << mat[0][1] << "," << mat[0][2] << "," << mat[0][3] << std::endl
-				<< mat[1][0] << "," << mat[1][1] << "," << mat[1][2] << "," << mat[1][3] << std::endl
-				<< mat[2][0] << "," << mat[2][1] << "," << mat[2][2] << "," << mat[2][3] << std::endl
-				<< mat[3][0] << "," << mat[3][1] << "," << mat[3][2] << "," << mat[3][3] << std::endl;
-		*/
 		glUniformMatrix4fv(boneLoc[i], 1, GL_TRUE, glm::value_ptr(mat));
 	}
 		
+	
+	GLuint interpLoc = glGetUniformLocation(*shaderProgram, "interpolation");
+	glUniform1fv(interpLoc, 4, &interpolation[0]);
 }
 
 void MeshManipulator::RotateBone(std::string boneName, float angle, float x, float y, float z, bool parentTransformation, aiMatrix4x4 globalInverseTransform){
@@ -279,6 +273,12 @@ void MeshManipulator::setupBindPose(aiMatrix4x4 globalInverseTransform){
 
 		temp = temp->next;
 	}
+	temp = rootBone;
+	while (temp != NULL){
+		GLuint i = temp->getBoneID();
+		interpolation[i] = temp->getInterpolation();
+		temp = temp->next;
+	}
 }
 
 void MeshManipulator::startAnimation(aiAnimation *_anim){
@@ -317,6 +317,13 @@ void MeshManipulator::tick(aiMatrix4x4 git, aiAnimation *_anim){
 		offsetMatrices[i][2][0] = mat[2][0]; offsetMatrices[i][2][1] = mat[2][1]; offsetMatrices[i][2][2] = mat[2][2]; offsetMatrices[i][2][3] = mat[2][3];
 		offsetMatrices[i][3][0] = mat[3][0]; offsetMatrices[i][3][1] = mat[3][1]; offsetMatrices[i][3][2] = mat[3][2]; offsetMatrices[i][3][3] = mat[3][3];
 
+		temp = temp->next;
+	}
+	
+	temp = rootBone;
+	while (temp != NULL){
+		GLuint i = temp->getBoneID();
+		interpolation[i] = temp->getInterpolation();
 		temp = temp->next;
 	}
 }

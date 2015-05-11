@@ -33,6 +33,8 @@ public:
 	void createAnimationInfo(aiNodeAnim *node);
 	void setUpInfluencedBone(std::string infName, int percentage);
 	void setUpInfluencer(std::string infName, int minAngle, int maxAngle);
+
+	double getInterpolation(){ return interpolation; }
 protected:
 	void setChildren(); 
 	void writeMatrix(aiMatrix4x4 mat);
@@ -41,6 +43,7 @@ protected:
 	aiVector3D calcTranslation(double AnimationTime, aiNodeAnim *anim);
 	void setParentChildAngle(double angle){ parentChildAngle = angle; }
 	double getParentChildAngle(){ return parentChildAngle; }
+	void setInterpolation(double interpol, std::string infName);
 private:
 	std::string child;
 	aiMatrix4x4 offsetMatrix;

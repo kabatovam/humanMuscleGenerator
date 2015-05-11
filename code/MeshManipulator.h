@@ -54,6 +54,7 @@ private:
 	std::vector<GLuint> vertexBoneIDs;
 	std::vector<GLfloat> vertexBoneWeights;
 	std::vector<glm::mat4x4> offsetMatrices;
+	std::vector<GLfloat> interpolation;
 	Bone *rootBone;
 	GLuint boneCount;
 	GLuint tickCounter;

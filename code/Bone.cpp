@@ -23,7 +23,7 @@ Bone::Bone(aiBone *bone){
 	animation = NULL;
 	minAngle = 0;
 	maxAngle = 0;
-	interpolation = 0;
+	interpolation = 1;
 	influencerName = "";
 	influencerPercentage = 0;
 	iAmInfluencer = false;
@@ -85,7 +85,7 @@ glm::mat4x4 Bone::getFinalTransform(){
 	if (parent != NULL){
 		parentChildAngle = animation->calculateAngle(parent->globalTransform, globalTransform,"X"); //zapisovanie axis!
 		if (iAmInfluencer)
-			animation->calcInterpolation(parentChildAngle, minAngle, maxAngle); //posielat do parent settera
+			parent->setInterpolation(animation->calcInterpolation(parentChildAngle, minAngle, maxAngle),boneName); //posielat do parent settera
 	}
 	return glm::mat4x4(finalTransform.a1, finalTransform.a2, finalTransform.a3, finalTransform.a4,
 		finalTransform.b1, finalTransform.b2, finalTransform.b3, finalTransform.b4,
@@ -206,7 +206,7 @@ aiQuaternion Bone::calcRotation(double animationTime, aiNodeAnim *anim){
 		}
 	}
 	if (!((index + 1) < animation->getNumRotation())){
-		return aiQuaternion(1, 0, 0, 0);
+		index--;
 	}
 	double delta = animation->getRotationTime(index + 1) - animation->getRotationTime(index);
 	double factor = (animation->getRotationTime(index) - animationTime) / delta;
@@ -255,7 +255,7 @@ aiVector3D Bone::calcTranslation(double animationTime, aiNodeAnim *anim){
 		}
 	}
 	if (!((index + 1) < animation->getNumTranslation())){
-		return aiVector3D(0, 0, 0);
+		index--;
 	}
 	double delta = animation->getTranslationTime(index +1) - animation->getTranslationTime(index);
 	float factor = (float)(animation->getTranslationTime(index) - animationTime) / delta;
@@ -289,7 +289,7 @@ void Bone::setUpInfluencedBone(std::string infName, int percentage){
 	else{
 		std::cout << "My name is " << boneName << "and I am influenced by " << infName << std::endl;
 		influencerName = infName;
-		influencerPercentage = percentage;
+		influencerPercentage = percentage/100;
 	}
 
 }
@@ -305,4 +305,10 @@ void Bone::setUpInfluencer(std::string infName, int minAng, int maxAng){
 		iAmInfluencer = true;
 	}
 	
+}
+
+void Bone::setInterpolation(double interpol, std::string infName){
+	//should be all in field and count based on infName
+	interpolation = interpol * influencerPercentage;
+	std::cout << "I am setting interpolatin from influencer " << infName << ": " << interpolation << std::endl;
 }

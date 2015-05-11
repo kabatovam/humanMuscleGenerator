@@ -206,7 +206,7 @@ void GLManipulator::setupTexture(){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	
-	/*
+	
 	TIFF* tif = TIFFOpen("C:/martinka/libs/cone_vdm.tif", "r");
 	TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
 	TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
@@ -216,7 +216,7 @@ void GLManipulator::setupTexture(){
 	for (tstrip_t strip = 0; strip < TIFFNumberOfStrips(tif); strip++)
 		TIFFReadEncodedStrip(tif, strip, data + strip * TIFFStripSize(tif), (tsize_t)-1);
 	GLuint ndata = width*height;
-/*	for (GLuint i = 0; i < ndata; i++) {
+	for (GLuint i = 0; i < ndata; i++) {
 		register unsigned char *cp = (unsigned char *)&data[i];
 		int t;
 
@@ -226,8 +226,8 @@ void GLManipulator::setupTexture(){
 		t = cp[2];
 		cp[2] = cp[1];
 		cp[1] = t;
-	}*/
-	
+	}
+	/*
 	TIFF* tif = TIFFOpen("C:/martinka/libs/16bit_texture_vdm.tif", "r");
 	if (tif) {
 		uint32 w, h;
@@ -247,12 +247,12 @@ void GLManipulator::setupTexture(){
 		}
 		TIFFClose(tif);
 	
-	}
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); //tiff to cita dajako naopak skontrolovat!
+	}*/
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); //tiff to cita dajako naopak skontrolovat!
 	//glGenerateMipmap(GL_TEXTURE_2D);
 
 	
-//	TIFFClose(tif);
+	TIFFClose(tif);
 
 	
 	
