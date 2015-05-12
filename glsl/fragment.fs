@@ -1,12 +1,12 @@
 #version 400 
 in vec2 texCoord;
-uniform sampler2D dispMap;
+uniform sampler2D tex;
 in vec4 color_ES;
 out vec4 color;
 void main()
 {
-	vec4 color_t = texture(dispMap,vec2(texCoord.x,texCoord.y));
-	//color = vec4(color_t);
+	vec4 color_t = texture(tex,vec2(texCoord.x,texCoord.y));
+	color = vec4(color_t);
 	//color = vec4(255,0.0,0.0,1.0);
-	color = color_ES;
+	//color = color_ES;
 }

@@ -66,11 +66,11 @@ void CameraManipulator::changeCameraRotation(GLfloat angle, bool xaxis, bool yax
 		angle = abs(angle - 360);
 	}
 	if (xaxis && xRot != angle){
-		view = glm::rotate(view, xRot, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, xRot, glm::vec3(1.0f, 0.0f, 0.0f));
 		xRot = angle;
 	}
 	if (yaxis && yRot != angle){
-		view = glm::rotate(view, yRot, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, yRot, glm::vec3(0.0f, 1.0f, 0.0f));
 		yRot = angle;
 	}
 	/*
